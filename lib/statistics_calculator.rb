@@ -1,4 +1,4 @@
-class Autocorrelation
+class StatisticsCalculator
   def mean(d)
     d.sum / d.length
   end
