@@ -1,5 +1,3 @@
-FROM ruby:3.2
+FROM ruby:3.2.2
 
 WORKDIR /app
-
-RUN bundle config path 'vendor/bundle'

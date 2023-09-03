@@ -1,6 +1,8 @@
 class StatisticsCalculator
   require 'bigdecimal'
   require 'bigdecimal/util'
+
+  ROUNDING_DIGIT = 3
   def mean(d)
     d.sum / d.length.to_d
   end
@@ -22,9 +24,36 @@ class StatisticsCalculator
   def autocorrelation_coefficient(d)
     result = []
     for lag in 0..d.length - 2
-      result << correlation_coefficient(d[0...(d.length - lag)], d[lag..-1]).round(3).to_f 
+      result << correlation_coefficient(d[0...(d.length - lag)], d[lag..-1]).round(ROUNDING_DIGIT).to_f 
     end
    
     result
   end
+
+  def max_peak_indexes(d)
+    old = d[0]
+    result = [0]
+    up = nil
+    d.shift
+    d.each_with_index do |elm, index|
+      result << index if up and old >= elm
+      up = old <= elm
+      old = elm
+    end
+    result
+  end
+
+  def difference_sequence(d)
+    result = []
+    old = d[0]
+
+    d.shift
+    d.each_with_index do |elm|
+      result << elm - old
+      old = elm
+    end
+    result
+  end
+
+  
 end
