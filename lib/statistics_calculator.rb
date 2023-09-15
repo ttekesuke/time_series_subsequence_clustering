@@ -13,8 +13,12 @@ class StatisticsCalculator
     (d1.zip(d2).map{|_d1, _d2 |_d1 * _d2}.sum / d1.size.to_d) - (mean(d1) * mean(d2))
   end
 
+  def variance(d)
+    d.map{|e| (e - (mean(d))) ** 2}.sum / d.length.to_d
+  end
+
   def standard_deviation(d)
-    Math.sqrt(d.map{|i| (i - (mean(d))) ** 2}.sum / d.length.to_d)
+    Math.sqrt(variance(d))
   end
 
   def correlation_coefficient(d1, d2)
@@ -24,9 +28,8 @@ class StatisticsCalculator
   def autocorrelation_coefficient(d)
     result = []
     for lag in 0..d.length - 2
-      result << correlation_coefficient(d[0...(d.length - lag)], d[lag..-1]).round(ROUNDING_DIGIT).to_f 
+      result << correlation_coefficient(d[0...(d.length - lag)], d[lag..-1])
     end
-   
     result
   end
 
@@ -55,5 +58,12 @@ class StatisticsCalculator
     result
   end
 
-  
+  def rounding(e)
+    e.round(ROUNDING_DIGIT).to_f 
+  end
+
+  def rounding_array(d)
+    d.map{|e|rounding(e)}
+  end
+
 end
