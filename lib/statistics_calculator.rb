@@ -22,7 +22,12 @@ class StatisticsCalculator
   end
 
   def correlation_coefficient(d1, d2)
-    covariance(d1, d2) / ( standard_deviation(d1) * standard_deviation(d2) ).to_d
+    standard_deviations = standard_deviation(d1) * standard_deviation(d2)
+    if standard_deviations == 0.0
+      0
+    else
+      covariance(d1, d2) / standard_deviations.to_d
+    end
   end
 
   def autocorrelation_coefficient(d)

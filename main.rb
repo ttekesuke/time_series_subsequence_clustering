@@ -1,27 +1,31 @@
 require "./lib/statistics_calculator"
 
 statistics = StatisticsCalculator.new
-# data = [1,3,5,1,3,5,1,1,1,1,1,3,5,1,3,5,1,1,1,1,1]
-data = [3,4,3,3,4,3]
 
-p 'data'
-p data
+maxima_indices = [0, 4]
+maxima_values = [1.0, 1.0]
+data_length = 8
+possible_values = (1..3).to_a
+optimal_data = []
+optimal_acf = []
+optimal_acf_fit_score = nil
 
-p 'autocorrelation_coefficient'
-autocorrelation_coefficient = statistics.autocorrelation_coefficient(data)
-p statistics.rounding_array(autocorrelation_coefficient)
-    
-p 'max_peak_indexes'
-max_peak_indexes = statistics.max_peak_indexes(autocorrelation_coefficient)
-p max_peak_indexes
+possible_patterns = possible_values.repeated_permutation(data_length).to_a
+possible_patterns.each do |pattern|
+  acf = statistics.rounding_array(statistics.autocorrelation_coefficient(pattern))
+  fit_score = 0
+  maxima_indices.each_with_index do |index, i|
+    fit_score += (acf[index] - maxima_values[i]).abs
+  end
 
-p 'diff'
-difference_sequences = statistics.difference_sequence(max_peak_indexes)
-p difference_sequences
+  if optimal_acf.empty? || fit_score < optimal_acf_fit_score
+    optimal_data = pattern
+    optimal_acf = acf
+    optimal_acf_fit_score = fit_score
+  end
+end
 
-p 're_autocorrelation_coefficient'
-re_autocorrelation_coefficient = statistics.autocorrelation_coefficient(difference_sequences)
-p statistics.rounding_array(re_autocorrelation_coefficient)
-
-var1 = [1,2,3,4,5,6]
-p statistics.rounding(statistics.variance(var1))
+p "optimal_data"
+p optimal_data
+p "optimal_acf"
+p optimal_acf
