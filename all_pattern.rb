@@ -1,7 +1,7 @@
 require "./lib/statistics_calculator"
 require "./lib/utility"
 
-class Main
+class AllPattern
   include StatisticsCalculator
   include Utility
 
@@ -54,5 +54,5 @@ class Main
   end
 end
 
-main = Main.new
-main.run
+all_pattern = AllPattern.new
+all_pattern.run
