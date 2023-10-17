@@ -4,20 +4,18 @@ class GeneticAlgorithm
   include StatisticsCalculator
   include Utility
 
-  def initialize(maxima_indices, maxima_values, data_length, user_defined_initial_data, possible_values)
-    @maxima_indices = maxima_indices
-    @maxima_values = maxima_values
+  def initialize(target_acf, data_length, user_defined_initial_data, possible_values)
+    @target_acf = target_acf
     @data_length = data_length
     @user_defined_initial_data = user_defined_initial_data
     @possible_values = possible_values
-    @population_size = 50
+    @population_size = 100
     @mutation_rate = 0.1
-    @generations = 100
+    @generations = 10
   end
 
   def run
     population = generate_initial_population
-
 
     @generations.times do |generation_index|
       fitness_scores = calculate_fitness(population)
@@ -25,7 +23,7 @@ class GeneticAlgorithm
       children = crossover(parents, population)
       children = mutate(children)
       population = children
-      p "current generation：#{generation_index}"
+      p "current generation：#{generation_index} time:#{Time.now}"
     end
 
     fitness_values = calculate_fitness(population)
@@ -35,24 +33,24 @@ class GeneticAlgorithm
       min_value_indices << i if fitness_values[i] == min_value
     end
     best_individuals = min_value_indices.map { |index| population[index] }
-    p best_individuals
-    acf = round_array(autocorrelation_coefficient(best_individuals[0]))
+    unique_best_individuals = best_individuals.uniq
+    acf = round_array(autocorrelation_coefficient(unique_best_individuals[0]))
+    p unique_best_individuals
     p acf
-    p max_peak_indexes(acf)
   end
 
   private
 
   def generate_initial_population
     population = []
-
     @population_size.times do
       individual = @user_defined_initial_data.clone
       remaining_length = @data_length - individual.length
-      remaining_length.times { individual << @possible_values.sample }
+      individual.concat(Array.new(500){ |e| rand(1..12) })
       population << individual
     end
     population
+
   end
 
   def calculate_fitness(population)
@@ -68,8 +66,8 @@ class GeneticAlgorithm
 
   def calculate_score(acf)
     diffs = []
-    @maxima_indices.each_with_index do |index, i|
-      diff = (acf[index] - @maxima_values[i]).abs
+    @target_acf.each_with_index do |target_acf_element, index|
+      diff = (acf[index] - target_acf_element).abs
       diffs << diff
     end
 
@@ -129,7 +127,7 @@ class GeneticAlgorithm
     end
   
     if population.length.odd?
-      children << parents.last
+      children << parents.last.clone # user_defined_initial_data の部分を保持するために clone を使用
     end
   
     children
@@ -137,12 +135,13 @@ class GeneticAlgorithm
 
   def mutate(children)
     mutated_children = children.map do |child|
-      mutation_point = rand(child.length)
-      mutated_value = rand(1..4)
-      child[mutation_point] = mutated_value
-      child
+      mutation_point = rand(@user_defined_initial_data.length...child.length)  # user_defined_initial_dataより後ろの部分をmutateする
+      mutated_value = rand(@possible_values[0]..@possible_values[-1])
+      child_copy = child.dup  # 元のデータを変更しないようにコピー
+      child_copy[mutation_point] = mutated_value
+      child_copy
     end
-
+  
     mutated_children
   end
 end

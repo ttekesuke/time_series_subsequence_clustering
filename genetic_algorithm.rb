@@ -1,12 +1,16 @@
 require "./lib/genetic_algorithm"
-maxima_indices = [0, 5, 8, 13, 16, 21, 24, 29, 32]
-data_length = 37
-user_defined_initial_data = [1, 4]
-maxima_values = Array.new(maxima_indices.length, 1.0)
-user_defined_initial_data = [1,2,3,4]
-possible_values = (1..4).to_a
+require "./lib/statistics_calculator"
+require "./lib/utility"
+include StatisticsCalculator
+include Utility
+original = Array.new(500){ |e| rand(1..12) }
+p original
+original_autocorrelation = round_array(autocorrelation_coefficient(original))
+p original_autocorrelation
+data_length = original_autocorrelation.length
+user_defined_initial_data = [1, 3, 5]
+possible_values = (1..12).to_a
 
-genetic_algorithm = GeneticAlgorithm.new(maxima_indices, maxima_values, data_length, user_defined_initial_data, possible_values)
+genetic_algorithm = GeneticAlgorithm.new(original_autocorrelation, data_length, user_defined_initial_data, possible_values)
 result = genetic_algorithm.run
 
-puts "Optimal Data: #{result}"

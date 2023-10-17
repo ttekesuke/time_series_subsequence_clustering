@@ -26,13 +26,6 @@ module StatisticsCalculator
       covariance(d1, d2) / standard_deviations.to_d
     end
   end
-  def autocorrelation_coefficient(d)
-    result = []
-    for lag in 0..d.length - 1
-      result << correlation_coefficient(d[0...(d.length - lag)], d[lag..-1])
-    end
-    result
-  end
   
   def dtw_distance(d1, d2)
     n = d1.length
@@ -77,5 +70,9 @@ module StatisticsCalculator
       result << yield(d[0...(d.length - lag)], d[lag..-1])
     end
     result
+  end
+  
+  def autocorrelation_coefficient(d)
+    compare_original_and_shifted_data(d) {|d1, d2| correlation_coefficient(d1, d2)}
   end
 end
