@@ -7,11 +7,11 @@ class DecideGradually
   def run
     possible_range = (1..12)
     possible_values = possible_range.to_a 
-    original = Array.new(200){ |e| rand(possible_range) }
+    original = Array.new(5000){ |e| rand(possible_range) }
     original_autocorrelations_each_length = []
     for index in 0..original.length
       p "index:#{index}"
-      original_autocorrelations_each_length << autocorrelation_coefficient(original[0..index])
+      original_autocorrelations_each_length << compare_original_and_shifted_by_euclidean_distance(original[0..index])
     end
 
     result = original[0..2]
@@ -21,7 +21,7 @@ class DecideGradually
       optimal_value = nil
 
       possible_values.each do |possible|
-        acf = autocorrelation_coefficient(result + [possible])
+        acf = compare_original_and_shifted_by_euclidean_distance(result + [possible])
         euclidean_distance = euclidean_distance(original_autocorrelations_each_length[counter], acf)
         if shortest_euclidean_distance > euclidean_distance
           shortest_euclidean_distance = euclidean_distance
@@ -30,7 +30,7 @@ class DecideGradually
       end
       result.push(optimal_value)
     end
-    result_autocorrelation = autocorrelation_coefficient(result)
+    result_autocorrelation = compare_original_and_shifted_by_euclidean_distance(result)
     p original
     p result
   end

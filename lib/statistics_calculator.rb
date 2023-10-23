@@ -75,4 +75,8 @@ module StatisticsCalculator
   def autocorrelation_coefficient(d)
     compare_original_and_shifted_data(d) {|d1, d2| correlation_coefficient(d1, d2)}
   end
+  
+  def compare_original_and_shifted_by_euclidean_distance(d)
+    compare_original_and_shifted_data(d) {|d1, d2| euclidean_distance(d1, d2)}
+  end
 end
