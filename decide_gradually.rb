@@ -7,22 +7,41 @@ class DecideGradually
   def run
     possible_range = (1..12)
     possible_values = possible_range.to_a 
-    original = Array.new(5000){ |e| rand(possible_range) }
-    original_autocorrelations_each_length = []
-    for index in 0..original.length
-      p "index:#{index}"
-      original_autocorrelations_each_length << compare_original_and_shifted_by_euclidean_distance(original[0..index])
-    end
+    target_length = 10
 
-    result = original[0..2]
-    result.length.upto(original.length - 1) do |counter|
+    target_distances_each_length = []
+    # for index in 0..target_length
+    #   if index == 0
+    #     elm = [0]
+    #   else
+    #     elm = target_distances_each_length[index - 1] + [rand(0..12).to_i]
+    #   end
+    #   target_distances_each_length << elm
+    # end
+    target_distances_each_length = [
+      [0],
+      [0,1],
+      [0,1,3,],
+      [0,1,3,0],
+      [0,1,3,0,1],
+      [0,1,3,0,1,3,],
+      [0,1,3,0,1,3,0,],
+      [0,1,3,0,1,3,0,1,],
+      [0,1,3,0,1,3,0,1,3,],
+      [0,1,3,0,1,3,0,1,3,0],
+    ]
+
+    p target_distances_each_length
+
+    result = [1]
+    result.length.upto(target_length - 1) do |counter|
       p "counter:#{counter}"
       shortest_euclidean_distance = Float::INFINITY
       optimal_value = nil
 
       possible_values.each do |possible|
-        acf = compare_original_and_shifted_by_euclidean_distance(result + [possible])
-        euclidean_distance = euclidean_distance(original_autocorrelations_each_length[counter], acf)
+        ed = compare_original_and_shifted_by_euclidean_distance(result + [possible])
+        euclidean_distance = euclidean_distance(target_distances_each_length[counter], ed)
         if shortest_euclidean_distance > euclidean_distance
           shortest_euclidean_distance = euclidean_distance
           optimal_value = possible
@@ -30,8 +49,8 @@ class DecideGradually
       end
       result.push(optimal_value)
     end
-    result_autocorrelation = compare_original_and_shifted_by_euclidean_distance(result)
-    p original
+    result_distances = compare_original_and_shifted_by_euclidean_distance(result)
+    p result_distances
     p result
   end
 end
