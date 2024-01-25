@@ -7,10 +7,21 @@ module Utility
     old = d[0]
     result = [0]
     up = nil
-    d.shift
-    d.each_with_index do |elm, index|
+    d[1..-1].each_with_index do |elm, index|
       result << index if up and old >= elm
       up = old <= elm
+      old = elm
+    end
+    result
+  end
+    
+  def min_peak_indexes(d)
+    old = d[0]
+    result = [0]
+    up = nil
+    d[1..-1].each_with_index do |elm, index|
+      result << index if up and old <= elm
+      up = old >= elm
       old = elm
     end
     result
@@ -20,8 +31,7 @@ module Utility
     result = []
     old = d[0]
 
-    d.shift
-    d.each_with_index do |elm|
+    d[1..-1].each_with_index do |elm|
       result << elm - old
       old = elm
     end

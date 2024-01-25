@@ -9,3 +9,6 @@ services:
       - type: bind
         source: ./
         target: /app
+      - gem_cache:/usr/local/bundle
+volumes:
+  gem_cache:
