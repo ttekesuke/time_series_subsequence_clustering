@@ -25,6 +25,23 @@ def extend_to_max_length(subsequences, data)
   end
 end
 
+def extend_to_max_length_average(subsequences)
+  max_length = subsequences.map { |seq| seq.size }.max
+  new_datas = []
+  subsequences.map do |seq|
+    
+    new_data = seq
+    if seq.size < max_length
+      diff = max_length / seq.size
+      remainder = max_length % seq.size
+      new_data = seq.flat_map { |v| [v] * diff }
+      new_data += [seq.last] * remainder
+    end
+    new_datas << new_data
+  end
+  new_datas
+end
+
 def merge_clusters(cluster_a, cluster_b, new_id, data)
   new_elements = []
   overlapped_elements_a = []
@@ -59,10 +76,10 @@ def overlapping(subseq_a, subseq_b)
   end
 end
 
-data = Array.new(40) { rand(0..9) } 
+data = Array.new(100) { rand(0..9) } 
 # data = [1,2,3,4,1,2,3,4,1,2,3,4,1,2,3,4,1,2,3,4,1,2,3,4,1,2,3,4,1,2,3,4,1,2,3,4,1,3,4,1,2,3,4,1,2,3,4]
 p data
-max_clusters = 15
+max_clusters = 10
 min_window_size = 2
 max_window_size = 6
 cluster_id_counter = 0
@@ -81,18 +98,21 @@ min_window_size.upto(max_window_size) do |window_size|
   all_clusters += clusters
 end
 
+process_counter = 0
+first_all_clusters_size = all_clusters.size
 # クラスターの数が最大クラスタ数になるまで繰り返す
 while all_clusters.size > max_clusters do
+  p "process_counter:#{process_counter}/#{first_all_clusters_size - max_clusters - 1}"
+
   # クラスタ間のDTW距離の最小値を求める
   min_distance = Float::INFINITY
-  min_difference_sequence_distance = Float::INFINITY
+  # min_difference_sequence_distance = Float::INFINITY
   closest_pair = nil
   all_clusters.combination(2) do |c1, c2|
-    distance = dtw_distance(c1[:average], c2[:average])
-    difference_sequence_distance = dtw_distance(difference_sequence(c1[:average]), difference_sequence(c2[:average]))
-    if distance < min_distance && difference_sequence_distance < min_difference_sequence_distance
+    extend_averages = extend_to_max_length_average([c1[:average], c2[:average]])
+    distance = euclidean_distance(extend_averages[0], extend_averages[1])
+    if distance < min_distance
       min_distance = distance
-      min_difference_sequence_distance = difference_sequence_distance
       closest_pair = [c1, c2]
     end
   end
@@ -100,6 +120,7 @@ while all_clusters.size > max_clusters do
   all_clusters.delete_if { |c| c[:id] == closest_pair[0][:id] || c[:id] == closest_pair[1][:id] }
   all_clusters << merge_clusters(closest_pair[0], closest_pair[1], cluster_id_counter, data)
   cluster_id_counter += 1
+  process_counter += 1
 end
 
 all_clusters.each_with_index do |cluster, index|
