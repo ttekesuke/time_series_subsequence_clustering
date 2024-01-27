@@ -11,7 +11,7 @@ end
 result = Benchmark.realtime do
   data_length = 200
   data = Array.new(data_length){ |e| rand(1..12) }
-  1,2,3,4,1,2,3,4,1,2,3,4,1,2,3,4,1,2,3,4,1,2,3,4,1,2,3,4,1,2,3,4,1,3,4,1,2,3,4,1,2,3,4]
+  # data =[1,2,3,4,1,2,3,4,1,2,3,4,1,2,3,4,1,2,3,4,]
   # data_length = data.length
   p data
   min_window_size = 2
@@ -40,8 +40,14 @@ result = Benchmark.realtime do
     while current_window_clusters.length > current_window_subsequences.length / 2 do
       min_distance = Float::INFINITY
       closest_pair = nil
-      current_window_clusters.combination(2) do |c1, c2|
+      current_window_clusters.combination(2).each do |c1, c2|
         distance = euclidean_distance(c1[:average], c2[:average])
+
+        # 部分列が完全一致なら結合して終わり
+        if distance == 0.0
+          closest_pair = [c1, c2]
+          break
+        end
         # 最短になったら更新
         if distance < min_distance
           min_distance = distance
