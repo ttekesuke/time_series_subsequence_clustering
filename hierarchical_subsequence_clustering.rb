@@ -2,6 +2,7 @@ require 'set'
 require "./lib/statistics_calculator"
 require "./lib/utility"
 require 'benchmark'
+require 'gruff'
 include StatisticsCalculator
 include Utility
 
@@ -9,7 +10,7 @@ def generate_subsequences(window_size, start_indexes)
   start_indexes.map{|start_index|{start_index: start_index, end_index: start_index + window_size - 1}}
 end
 result = Benchmark.realtime do
-  data_length = 200
+  data_length = 50
   data = Array.new(data_length){ |e| rand(1..12) }
   # data =[1,2,3,4,1,2,3,4,]
   # data_length = data.length
@@ -104,15 +105,43 @@ result = Benchmark.realtime do
     )
   end
 
+  g = Gruff::Line.new(1200)
+  g.hide_legend = true
+  g.hide_dots = true
+  g.data :data, data
   all_window_clusters.each_with_index do |window_clusters, window_cluster_index|
-    p "window #{window_cluster_index + min_window_size}============================"
-    window_clusters.each_with_index do |cluster, cluster_index|
-      p "cluster #{cluster_index}"
-      p "average: #{cluster[:average]}"
-      cluster[:subsequences].each do |subsequence|
-        p data[subsequence[:start_index]..subsequence[:end_index]]
+    window_clusters.filter{|cluster|cluster[:subsequences].length > 1}.each do |cluster, cluster_index|
+      current_index = 0
+      array = []
+      current_position = 0
+      old_end = nil
+      cluster[:subsequences].each_with_index do |subsequence, index|
+        if subsequence[:start_index] > 0
+          array += [].fill(nil, 0..subsequence[:start_index] - current_position - 1)
+        end
+        if !old_end.nil? && subsequence[:start_index] <= old_end
+          array.pop(old_end - subsequence[:start_index] + 1)
+        end
+
+        array += data[subsequence[:start_index]..subsequence[:end_index]].map{|elm| elm + (12 * (window_cluster_index + 2))} 
+        old_end = subsequence[:end_index]
+
+        current_position = subsequence[:end_index] + 1
+        if index == cluster[:subsequences].length - 1 && subsequence[:end_index] < data.length - 1
+          array += [].fill(nil, 0..data.length - current_position - 1)
+        end
       end
+      g.data ((window_cluster_index + min_window_size).to_s + '_' + cluster_index.to_s).to_sym, array
     end
+    # p "window #{window_cluster_index + min_window_size}============================"
+    # window_clusters.each_with_index do |cluster, cluster_index|
+    #   p "cluster #{cluster_index}"
+    #   p "average: #{cluster[:average]}"
+    #   cluster[:subsequences].each do |subsequence|
+    #     p data[subsequence[:start_index]..subsequence[:end_index]]
+    #   end
+    # end
   end
+  g.write('exciting.png')
 end
 puts "処理時間 #{result}s"
